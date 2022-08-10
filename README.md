@@ -1,6 +1,5 @@
 # E-commerce HW1
 
-## HW1
+## HW2
 
--   [x] Tạo model Product
--   [x] Test model vừa tạo với route product và controller addProduct cho phép thêm 1 product bằng phương thức POST.
+-   [x] Tạo 5 route với API PRODUCT
