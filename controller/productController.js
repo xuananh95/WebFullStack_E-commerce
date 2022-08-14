@@ -1,10 +1,25 @@
 const Product = require("../models/productModel");
-const User = require("../models/userModel");
+const Review = require("../models/reviewModel");
 const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 
 const getProduct = asyncHandler(async (req, res) => {
-    const products = await Product.find({});
-    res.json(products);
+    const pageSize = 10;
+    const page = Number(req.query.pageNumber) || 1;
+    const keyword = req.query.keyword
+        ? { name: { $regex: req.query.keyword } }
+        : {};
+    // trả về tổng số product để hiển thị số page
+    const countProduct = await Product.countDocuments({ ...keyword });
+    const products = await Product.find({ ...keyword })
+        .limit(pageSize)
+        .skip((page - 1) * pageSize); // bỏ qua sản phẩm theo page size
+    res.json({
+        products,
+        countProduct,
+        page,
+    });
 });
 
 const getProductByID = asyncHandler(async (req, res) => {
@@ -38,6 +53,7 @@ const addProduct = asyncHandler(async (req, res) => {
     if (newProduct) {
         res.json({
             message: `Successfully added ${newProduct.name}`,
+            // trả về thông tin sản phẩm
         });
     } else {
         res.status(401);
@@ -62,10 +78,41 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
 });
 
+const AddReviewToProduct = asyncHandler(async (req, res) => {
+    // get product ID from URL params
+    const productID = new mongoose.mongo.ObjectId(req.params.id);
+    // get user ID from token
+    const token = req.headers.authorization.split(" ")[1];
+    const userID = new mongoose.mongo.ObjectId(
+        jwt.verify(token, "some_secret")
+    );
+    const { name, rating, comment } = req.body;
+    const newReview = await Review.create({
+        productID,
+        name,
+        rating,
+        comment,
+        userID,
+    });
+    if (newReview) {
+        res.status(200).json({
+            productID: newReview.productID,
+            name: newReview.name,
+            rating: newReview.rating,
+            comment: newReview.comment,
+            userID: newReview.userID,
+        });
+    } else {
+        res.status(400);
+        throw new Error("Error creating new review");
+    }
+});
+
 module.exports = {
     getProduct,
     getProductByID,
     deleteProduct,
     addProduct,
     updateProduct,
+    AddReviewToProduct,
 };

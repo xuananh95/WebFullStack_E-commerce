@@ -8,6 +8,7 @@ const {
     deleteProduct,
     addProduct,
     updateProduct,
+    AddReviewToProduct,
 } = require("../controller/productController");
 
 // 1
@@ -39,5 +40,11 @@ router.post("/", protect, isAdmin, addProduct);
 // @route: PUT /api/products/:id
 // @access: Private/admin
 router.put("/:id", protect, isAdmin, updateProduct);
+
+// 6. Create new review for product
+// @desc: Create new review for product
+// @route: POST /api/products/:id/reviews
+// @access: Private
+router.post("/:id/reviews", protect, AddReviewToProduct);
 
 module.exports = router;
