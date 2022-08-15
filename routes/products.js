@@ -9,6 +9,7 @@ const {
     addProduct,
     updateProduct,
     AddReviewToProduct,
+    getTopProducts,
 } = require("../controller/productController");
 
 // 1
@@ -16,6 +17,12 @@ const {
 // @route: GET /api/products
 // @access: Public
 router.get("/", getProduct);
+
+// 7. Get top 5 products (top 5 sản phẩm được rating trung bình cao nhất
+// @desc: Get top 5 products
+// @route: GET /api/products/top
+// @access: Public
+router.get("/top", getTopProducts);
 
 // 2
 // @desc: Get product by ID

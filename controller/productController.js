@@ -81,31 +81,44 @@ const updateProduct = asyncHandler(async (req, res) => {
 const AddReviewToProduct = asyncHandler(async (req, res) => {
     // get product ID from URL params
     const productID = new mongoose.mongo.ObjectId(req.params.id);
+    const productExist = Product.findById(productID);
+    if (!productExist) {
+        res.status(404);
+        throw new Error("Product does not exist!");
+    }
     // get user ID from token
     const token = req.headers.authorization.split(" ")[1];
     const userID = new mongoose.mongo.ObjectId(
         jwt.verify(token, "some_secret")
     );
+
     const { name, rating, comment } = req.body;
     const newReview = await Review.create({
-        productID,
+        product: productID,
         name,
         rating,
         comment,
-        userID,
+        user: userID,
     });
     if (newReview) {
         res.status(200).json({
-            productID: newReview.productID,
+            product: newReview.product,
             name: newReview.name,
             rating: newReview.rating,
             comment: newReview.comment,
-            userID: newReview.userID,
+            user: newReview.user,
         });
     } else {
         res.status(400);
         throw new Error("Error creating new review");
     }
+});
+
+const getTopProducts = asyncHandler(async (req, res) => {
+    const sortProduct = await Product.find({})
+        .sort({ rating: "desc" })
+        .limit(5);
+    res.json(sortProduct);
 });
 
 module.exports = {
@@ -115,4 +128,5 @@ module.exports = {
     addProduct,
     updateProduct,
     AddReviewToProduct,
+    getTopProducts,
 };
