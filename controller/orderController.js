@@ -50,9 +50,15 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 
 const updateOrder = asyncHandler(async (req, res) => {
-    const updatedOrder = await Order.findByIdAndUpdate(req.params.id, {
-        paymentResult: { status: req.body.status },
-    });
+    const updatedOrder = await Order.findByIdAndUpdate(
+        req.params.id,
+        {
+            $set: {
+                "paymentResult.status": req.body.status,
+            },
+        },
+        { new: true }
+    );
     if (updatedOrder) {
         res.json({
             message: "Successfully update order status",
